@@ -5,7 +5,7 @@ from tkinter import messagebox, Tk
 # Dimensiones de la  pantalla y titulo
 DIMENSIONES = 600
 VENTANA = pygame.display.set_mode((DIMENSIONES, DIMENSIONES))
-pygame.display.set_caption("Trabajo Parcial - Complejidad Algoritimica )
+pygame.display.set_caption("Trabajo Parcial - Complejidad Algoritimica")
 
 # Colores por defecto (global)
 filas = 50
