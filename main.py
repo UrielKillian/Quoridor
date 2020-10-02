@@ -328,7 +328,16 @@ def main(ventana, ancho):
                     t0 = time.time()
                     AStarAlgoritmo(lambda: draw(ventana, mapa, filas, ancho), mapa, inicio, final)
                     print(time.time()-t0)
-                    t1=time.time()
+                    
+                   t1 = time.time()
+                    BFS(lambda: draw(ventana, mapa, filas, ancho), mapa, inicio, final)
+                    print(time.time()-t1)
+                    
+                    t2 = time.time()
+                    Dijkstra(lambda: draw(ventana, mapa, filas, ancho), mapa, inicio, final)
+                    print(time.time()-t2)
+                    
+                    
                    
                 if event.key == pygame.K_c:
                     inicio = None
