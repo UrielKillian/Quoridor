@@ -8,6 +8,8 @@ global rows
 global columns
 rows = 9
 columns = 9
+node1_x, node1_y = 0, 0
+node2_x, node2_y = 0, 1
 #9x9 Board Graph creation
 #(Rows, Columns) = (Y, X)
 Board_Graph = networkx.Graph()
@@ -148,12 +150,7 @@ def Dijkstra(ini, fin):
 	time = (time_end - time_start) #output does not give the real value
 	return p, time
 
-#====================================================#
-#====================================================#
-#====================================================#
-#====================================================#
-#====================================================#
-#====================================================#
+
 
 #Board visual representation using Pygame
 pygame.init()
@@ -165,8 +162,8 @@ font = pygame.font.SysFont("verdana", 16)
 #Screen size defined:
 global width
 global height
-width  = 800
-height = 800
+width  = 600
+height = 600
 size = (width,height)
 color_square = (-2,-2) # cuadrado rojo jugador falta implementar el 2 jugador
 start_pos = (0, 0)
@@ -188,6 +185,7 @@ COLOR_PIEZA = (255,178,102)
 #Screen created:
 screen = pygame.display.set_mode(size)
 done = False
+Movimiento = False
 
 #Function to draw the board
 def DrawBoard():
@@ -229,11 +227,17 @@ def DrawWall(node1, node2):
 	if node1[0] == node2[0]:
 		x0 = 50 + SpaceX*node1[0]
 		y0 = 80 + SpaceY*node2[1]
+		print("Nodo nro 1: ")
+		print("x: ", x0)
+		print("y: ", y0)
 		x  = 50 + SpaceX*(node2[0]+1)
 		y  = y0
 	elif node1[1] == node2[1]:
 		x0 = 50 + SpaceX*node2[0]
 		y0 = 80 + SpaceY*node1[1]
+		print("Nodo nro1: ")
+		print("x: ", x0)
+		print("y: ", y0)
 		x  = x0
 		y  = 80 + SpaceY*(node2[1]+1)
 
@@ -249,6 +253,7 @@ def RefreshScreen():
 	FillSquare(COLOR_PIEZA, start_pos)
 	FillSquare(RED, color_square)
 	DrawBoard()
+
 	'''
 	DrawWall((0,0), (0,1))
 	DrawWall((0,2), (1,2))
@@ -257,13 +262,15 @@ def RefreshScreen():
 	DrawWall((0,6), (1,6))
 	DrawWall((2,0), (3,0))
 	'''
-	pygame.display.flip()
+
+	#pygame.display.flip()
 
 #Game Loop:
 while not done:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT: 
 			done = True
+
 		#Clicking a tile will create a path to it from (0, 0)
 		if event.type == pygame.MOUSEBUTTONDOWN:
 			if event.button == 1:
@@ -281,7 +288,7 @@ while not done:
 
 			if event.button == 3:
 				pos = ConvertMousePos(pygame.mouse.get_pos())
-
+				#pos = (8,8) #Final Position
 				if algorithm == 1:
 					alg_result = A_STAR(start_pos, pos)
 				elif algorithm == 2:
@@ -314,12 +321,34 @@ while not done:
 				algorithm = 3
 				algorithm_name = "Dijkstra"
 				screen.fill(BROWN)
-
+			if event.key == pygame.K_w:
+				node1_y = node1_y - 1
+				node2_y = node2_y - 1
+			if event.key == pygame.K_d:
+				node1_x = node1_x + 1
+				node2_x = node2_x + 1
+			if event.key == pygame.K_a:
+				node1_x = node1_x - 1
+				node2_x = node2_x - 1
+			if event.key == pygame.K_s:
+				node1_y = node1_y + 1
+				node2_y = node2_y + 1
+			if event.key == pygame.K_r:
+				node2_x = node2_x + 1
+				node2_y = node2_y - 1
+			if event.key == pygame.K_SPACE:
+				temp_node_1 = (node1_x, node1_y)
+				temp_node_2 = (node2_x, node2_y)
+				DrawWall(temp_node_1,temp_node_2)
+		pygame.display.update()
+		pygame.display.flip()
 	if path != None:
 		if len(path) > 0:
 			start_pos = path[0]
 			path.popleft()
 
+
+#Overlay UI
 	screen.fill(BROWN)
 	instructions1 = font.render("Click izquierdo -> Seleccionar punto de inicio", True, WHITE)
 	instructions2 = font.render("Click derecho -> Generar camino", True, WHITE)
