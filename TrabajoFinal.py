@@ -11,7 +11,8 @@ rows = 9
 columns = 9
 show_wall = False
 rotacion = True
-
+Puedes_jugar = True
+Puedes_Colocar_Muro = True
 # Nodos eliminados por los muros
 node1_x, node1_y = 0, 0
 node2_x, node2_y = 0, 1
@@ -100,82 +101,11 @@ def A_STAR(ini, fin):
 
 
 def BFS(ini, fin):
-    time_start = pygame.time.get_ticks()
-
-    def invalid(x, y):
-        return (x < 0) or (x >= rows) or (y < 0) or (y >= columns) \
-               or (visit[x][y])
-
-    def reconstructionPath():
-        path = deque()
-        ix = fin
-        while ix is not dad[ini]:
-            path.appendleft(ix)
-            ix = dad[ix]
-        return path
-
-    visit = [[False for col in range(columns)] for row in range(rows)]
-    dx = [0, 0, 1, -1]
-    dy = [1, -1, 0, 0]
-    dad = {}
-    queue = deque()
-    dad[ini] = (-1, -1)
-    queue.appendleft(ini)
-    # visit[ini[0]][ini[1]] = True
-    while len(queue):
-        cur = queue.popleft()
-        visit[cur[0]][cur[1]] = True
-        for op in range(4):
-            nx, ny = cur[0] + dx[op], cur[1] + dy[op]
-            if (not invalid(nx, ny)) and (Board_Graph.has_edge(cur, (nx, ny))):
-                queue.append((nx, ny))
-                # visit[nx][ny] = True
-                dad[(nx, ny)] = cur
-
-    p = reconstructionPath()
-    time_end = pygame.time.get_ticks()
-    time = time_end - time_start
-    return p, time
+    return
 
 
 def Dijkstra(ini, fin):
-    time_start = pygame.time.get_ticks()
-
-    def invalid(x, y):
-        return (x < 0) or (x >= rows) or (y < 0) or (y >= columns) \
-               or (visit[x][y])
-
-    def reconstructionPath():
-        path = deque()
-        ix = fin
-        while ix is not dad[ini]:
-            path.appendleft(ix)
-            ix = dad[ix]
-
-        return path
-
-    visit = [[False for col in range(columns)] for row in range(rows)]
-    dx = [0, 0, 1, -1]
-    dy = [1, -1, 0, 0]
-    dad = {}
-    queue = deque()
-    dad[ini] = (-1, -1)
-    queue.appendleft(ini)
-    # visit[ini[0]][ini[1]] = True
-    while len(queue):
-        cur = queue.popleft()
-        visit[cur[0]][cur[1]] = True
-        for op in range(4):
-            nx, ny = cur[0] + dx[op], cur[1] + dy[op]
-            if (not invalid(nx, ny)) and (Board_Graph.has_edge(cur, (nx, ny))):
-                queue.append((nx, ny))
-                # visit[nx][ny] = True
-                dad[(nx, ny)] = cur
-
-    p = reconstructionPath()
-    time_end = pygame.time.get_ticks()
-    time = (time_end - time_start)  # output does not give the real value
-    return p, time
+    return
 
 
 # Board visual representation using Pygame
@@ -330,23 +260,27 @@ while not done:
 
             if event.button == 3:
                 # pos = ConvertMousePos(pygame.mouse.get_pos())
+                Puedes_jugar = True
+                Puedes_Colocar_Muro = True
                 pos = (4, 9)  # Final Position
                 pos_2 = (8, 0)
                 if algorithm == 1:
+                    i = 0
                     alg_result = A_STAR(start_pos_2, pos)
                 elif algorithm == 2:
+                    i = 1
                     # alg_result = BFS(start_pos_2, pos)
                     best_route_BFS = networkx.bellman_ford_path(Board_Graph, start_pos_2, (4, 9))
                     print("La mejor ruta es: ", best_route_BFS)
                     alg_result = best_route_BFS
                 # alg_result = BFS(start_pos_2, pos_2)
                 elif algorithm == 3:
+                    i = 1
                     # alg_result = Dijkstra(start_pos_2, pos)
                     best_route_dijkstra = networkx.dijkstra_path(Board_Graph, start_pos_2, (4, 9))
                     alg_result = best_route_dijkstra
                 # alg_result = Dijkstra(start_pos_2, pos_2)
-
-                path2 = deque([alg_result[1]])
+                path2 = deque([alg_result[i]])
                 print("El recorrido es el siguiente: ", path2)
                 path_lenght = len(path2)
                 time = alg_result[1]
@@ -359,34 +293,43 @@ while not done:
 
         # Algorithm selection
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
-                dx = 0
-                dy = -1
-                nx, ny = start_pos[0] + dx, start_pos[1] + dy
-                if (Board_Graph.has_edge(start_pos, (nx, ny))):
-                    path = deque([(start_pos[0], start_pos[1] - 1)])
-                    print("Key Up: ---> new pos: ", path)
-            if event.key == pygame.K_DOWN:
-                dx = 0
-                dy = +1
-                nx, ny = start_pos[0] + dx, start_pos[1] + dy
-                if (Board_Graph.has_edge(start_pos, (nx, ny))):
-                    path = deque([(start_pos[0], start_pos[1] + 1)])
-                    print("Key down: ---> new pos: ", path)
-            if event.key == pygame.K_LEFT:
-                dx = -1
-                dy = 0
-                nx, ny = start_pos[0] + dx, start_pos[1] + dy
-                if (Board_Graph.has_edge(start_pos, (nx, ny))):
-                    path = deque([(start_pos[0] - 1, start_pos[1])])
-                    print("key left: ---> new pos: ", path)
-            if event.key == pygame.K_RIGHT:
-                dx = +1
-                dy = 0
-                nx, ny = start_pos[0] + dx, start_pos[1] + dy
-                if (Board_Graph.has_edge(start_pos, (nx, ny))):
-                    path = deque([(start_pos[0] + 1, start_pos[1])])
-                    print("key right: ---> new pos: ", path)
+            if Puedes_jugar:
+                if event.key == pygame.K_UP:
+                    dx = 0
+                    dy = -1
+                    nx, ny = start_pos[0] + dx, start_pos[1] + dy
+                    if (Board_Graph.has_edge(start_pos, (nx, ny))):
+                        path = deque([(start_pos[0], start_pos[1] - 1)])
+                        print("Key Up: ---> new pos: ", path)
+                    Puedes_jugar = False
+                    Puedes_Colocar_Muro = False;
+                if event.key == pygame.K_DOWN:
+                    dx = 0
+                    dy = +1
+                    nx, ny = start_pos[0] + dx, start_pos[1] + dy
+                    if (Board_Graph.has_edge(start_pos, (nx, ny))):
+                        path = deque([(start_pos[0], start_pos[1] + 1)])
+                        print("Key down: ---> new pos: ", path)
+                    Puedes_jugar = False
+                    Puedes_Colocar_Muro = False;
+                if event.key == pygame.K_LEFT:
+                    dx = -1
+                    dy = 0
+                    nx, ny = start_pos[0] + dx, start_pos[1] + dy
+                    if (Board_Graph.has_edge(start_pos, (nx, ny))):
+                        path = deque([(start_pos[0] - 1, start_pos[1])])
+                        print("key left: ---> new pos: ", path)
+                    Puedes_jugar = False
+                    Puedes_Colocar_Muro = False;
+                if event.key == pygame.K_RIGHT:
+                    dx = +1
+                    dy = 0
+                    nx, ny = start_pos[0] + dx, start_pos[1] + dy
+                    if (Board_Graph.has_edge(start_pos, (nx, ny))):
+                        path = deque([(start_pos[0] + 1, start_pos[1])])
+                        print("key right: ---> new pos: ", path)
+                    Puedes_jugar = False
+                    Puedes_Colocar_Muro = False;
             if event.key == pygame.K_1:
                 algorithm = 1
                 algorithm_name = "A STAR"
@@ -399,70 +342,74 @@ while not done:
                 algorithm = 3
                 algorithm_name = "Dijkstra"
                 screen.fill(BROWN)
-            if event.key == pygame.K_e:
-                print("Visibilidad de la pared (Edicion): ", show_wall)
-                if show_wall == False:
-                    show_wall = True
-                else:
-                    show_wall = False
-            if event.key == pygame.K_w:
-                node1_y = node1_y - 1
-                node2_y = node2_y - 1
-                node3_y = node3_y - 1
-                node4_y = node4_y - 1
-            if event.key == pygame.K_d:
-                node1_x = node1_x + 1
-                node2_x = node2_x + 1
-                node3_x = node3_x + 1
-                node4_x = node4_x + 1
-            if event.key == pygame.K_a:
-                node1_x = node1_x - 1
-                node2_x = node2_x - 1
-                node3_x = node3_x - 1
-                node4_x = node4_x - 1
-            if event.key == pygame.K_s:
-                node1_y = node1_y + 1
-                node2_y = node2_y + 1
-                node3_y = node3_y + 1
-                node4_y = node4_y + 1
-            if event.key == pygame.K_r:
-                if rotacion:
-                    node2_x = node2_x + 1
+            if Puedes_Colocar_Muro == False:
+                show_wall = False
+            if Puedes_Colocar_Muro:
+                if event.key == pygame.K_e:
+                    print("Visibilidad de la pared (Edicion): ", show_wall)
+                    if show_wall == False:
+                        show_wall = True
+                    else:
+                        show_wall = False
+                if event.key == pygame.K_w:
+                    node1_y = node1_y - 1
                     node2_y = node2_y - 1
-                    node3_x = node3_x - 1
-                    node3_y = node3_y + 1
-                    rotacion = False
-                else:
-                    node2_x = node2_x - 1
-                    node2_y = node2_y + 1
-                    node3_x = node3_x + 1
                     node3_y = node3_y - 1
-                    rotacion = True
-            if event.key == pygame.K_SPACE:
-                temp_node_1 = (node1_x, node1_y)
-                temp_node_2 = (node2_x, node2_y)
-                temp_node_3 = (node3_x, node3_y)
-                temp_node_4 = (node4_x, node4_y)
-                print("Nodo_x_1: ", node1_x)
-                print("Nodo_y_1: ", node1_y)
-                print("Nodo_x_2: ", node2_x)
-                print("Nodo_y_2: ", node2_y)
-                print("Nodo_x_3: ", node3_x)
-                print("Nodo_y_3: ", node3_y)
-                print("Nodo_x_4: ", node4_x)
-                print("Nodo_y_4: ", node4_y)
-                lista_node1_x.append(node1_x)
-                lista_node1_y.append(node1_y)
-                lista_node2_x.append(node2_x)
-                lista_node2_y.append(node2_y)
-                lista_node3_x.append(node3_x)
-                lista_node3_y.append(node3_y)
-                lista_node4_x.append(node4_x)
-                lista_node4_y.append(node4_y)
-                RemoveEdge(node1_x, node1_y, node2_x, node2_y)
-                RemoveEdge(node3_x, node3_y, node4_x, node4_y)
-                DrawWall(temp_node_1, temp_node_2)
-                DrawWall(temp_node_3, temp_node_4)
+                    node4_y = node4_y - 1
+                if event.key == pygame.K_d:
+                    node1_x = node1_x + 1
+                    node2_x = node2_x + 1
+                    node3_x = node3_x + 1
+                    node4_x = node4_x + 1
+                if event.key == pygame.K_a:
+                    node1_x = node1_x - 1
+                    node2_x = node2_x - 1
+                    node3_x = node3_x - 1
+                    node4_x = node4_x - 1
+                if event.key == pygame.K_s:
+                    node1_y = node1_y + 1
+                    node2_y = node2_y + 1
+                    node3_y = node3_y + 1
+                    node4_y = node4_y + 1
+                if event.key == pygame.K_r:
+                    if rotacion:
+                        node2_x = node2_x + 1
+                        node2_y = node2_y - 1
+                        node3_x = node3_x - 1
+                        node3_y = node3_y + 1
+                        rotacion = False
+                    else:
+                        node2_x = node2_x - 1
+                        node2_y = node2_y + 1
+                        node3_x = node3_x + 1
+                        node3_y = node3_y - 1
+                        rotacion = True
+                if event.key == pygame.K_SPACE:
+                    temp_node_1 = (node1_x, node1_y)
+                    temp_node_2 = (node2_x, node2_y)
+                    temp_node_3 = (node3_x, node3_y)
+                    temp_node_4 = (node4_x, node4_y)
+                    print("Nodo_x_1: ", node1_x)
+                    print("Nodo_y_1: ", node1_y)
+                    print("Nodo_x_2: ", node2_x)
+                    print("Nodo_y_2: ", node2_y)
+                    print("Nodo_x_3: ", node3_x)
+                    print("Nodo_y_3: ", node3_y)
+                    print("Nodo_x_4: ", node4_x)
+                    print("Nodo_y_4: ", node4_y)
+                    lista_node1_x.append(node1_x)
+                    lista_node1_y.append(node1_y)
+                    lista_node2_x.append(node2_x)
+                    lista_node2_y.append(node2_y)
+                    lista_node3_x.append(node3_x)
+                    lista_node3_y.append(node3_y)
+                    lista_node4_x.append(node4_x)
+                    lista_node4_y.append(node4_y)
+                    RemoveEdge(node1_x, node1_y, node2_x, node2_y)
+                    RemoveEdge(node3_x, node3_y, node4_x, node4_y)
+                    DrawWall(temp_node_1, temp_node_2)
+                    DrawWall(temp_node_3, temp_node_4)
+                    Puedes_Colocar_Muro = False
         pygame.display.update()
         pygame.display.flip()
     if path2 != None:
