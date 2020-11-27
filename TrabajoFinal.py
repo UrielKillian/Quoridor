@@ -1,7 +1,10 @@
+import queue
+
 import pygame
 import networkx
-
-import matplotlib.pyplot as plt
+import heapq as hq
+import math
+from math import inf
 from collections import deque
 
 # Board Size Defined:
@@ -100,12 +103,82 @@ def A_STAR(ini, fin):
     return p[1], time
 
 
-def BFS(ini, fin):
-    return
+def BFS (graph, ini, fin):
+    dad = {ini: None}
+    queue = deque([ini])
+    while queue:
+        node = queue.popleft()
+        for vecino in graph[node]:
+            if vecino not in dad:
+                dad[vecino] = node
+                queue.append(vecino)
+                if node == fin:
+                    break
+
+    path = [fin]
+    while dad[fin] is not None:
+        path.insert(0, dad[fin])
+        fin = dad[fin]
+
+    return path
 
 
-def Dijkstra(ini, fin):
-    return
+def Dijkstra(graph, start, end) -> 'List':
+    def backtrace(prev, start, end):
+        node = end
+        path = []
+        while node != start:
+            path.append(node)
+            node = prev[node]
+        path.append(node)
+        path.reverse()
+        return path
+
+    # predecessor of current node on shortest path
+    prev = {}
+    # initialize distances from start -> given node i.e. dist[node] = dist(start, node)
+    dist = {v: inf for v in list(networkx.nodes(graph))}
+    # nodes we've visited
+    visited = set()
+    # prioritize nodes from start -> node with the shortest distance!
+    ## elements stored as tuples (distance, node)
+    pq = queue.PriorityQueue()
+
+    dist[start] = 0  # dist from start -> start is zero
+    pq.put((dist[start], start))
+
+    while 0 != pq.qsize():
+        curr_cost, curr = pq.get()
+        visited.add(curr)
+        # look at curr's adjacent nodes
+        for neighbor in dict(graph.adjacency()).get(curr):
+            # if we found a shorter path
+            path = dist[curr]
+            if path < dist[neighbor]:
+                # update the distance, we found a shorter one!
+                dist[neighbor] = path
+                # update the previous node to be prev on new shortest path
+                prev[neighbor] = curr
+                # if we haven't visited the neighbor
+                if neighbor not in visited:
+                    # insert into priority queue and mark as visited
+                    visited.add(neighbor)
+                    pq.put((dist[neighbor], neighbor))
+                # otherwise update the entry in the priority queue
+                else:
+                    # remove old
+                    _ = pq.get((dist[neighbor], neighbor))
+                    # insert new
+                    pq.put((dist[neighbor], neighbor))
+    print("=== Dijkstra's Algo Output ===")
+    print("Distances")
+    print(dist)
+    print("Visited")
+    print(visited)
+    print("Previous")
+    print(prev)
+    # we are done after every possible path has been checked
+    return backtrace(prev, start, end), dist[end]
 
 
 # Board visual representation using Pygame
@@ -229,7 +302,7 @@ def RefreshScreen():
 
 # Game Loop:
 while not done:
-    for i in range (0, 8):
+    for i in range(0, 8):
         if start_pos == (i, 0):
             print("--------------------------------------------------------")
             print("--------------> El jugador ha ganado  <-----------------")
@@ -270,14 +343,15 @@ while not done:
                 elif algorithm == 2:
                     i = 1
                     # alg_result = BFS(start_pos_2, pos)
-                    best_route_BFS = networkx.bellman_ford_path(Board_Graph, start_pos_2, (4, 9))
+                    best_route_BFS = BFS(Board_Graph, start_pos_2,(4,9))
                     print("La mejor ruta es: ", best_route_BFS)
                     alg_result = best_route_BFS
                 # alg_result = BFS(start_pos_2, pos_2)
                 elif algorithm == 3:
                     i = 1
                     # alg_result = Dijkstra(start_pos_2, pos)
-                    best_route_dijkstra = networkx.dijkstra_path(Board_Graph, start_pos_2, (4, 9))
+                    best_route_dijkstra = Dijkstra(Board_Graph, start_pos_2, (4, 9))[0]
+                    print("La mejor ruta para Dijkstra es: ", best_route_dijkstra)
                     alg_result = best_route_dijkstra
                 # alg_result = Dijkstra(start_pos_2, pos_2)
                 path2 = deque([alg_result[i]])
