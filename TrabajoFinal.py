@@ -333,13 +333,15 @@ while not done:
 
             if event.button == 3:
                 # pos = ConvertMousePos(pygame.mouse.get_pos())
+                pos_3 = ConvertMousePos(pygame.mouse.get_pos())
+                finish_pos_3 = pos_3
                 Puedes_jugar = True
                 Puedes_Colocar_Muro = True
                 pos = (4, 9)  # Final Position
                 pos_2 = (8, 0)
                 if algorithm == 1:
                     i = 0
-                    alg_result = A_STAR(start_pos_2, pos)
+                    alg_result = A_STAR(start_pos_2, finish_pos_3)
                 elif algorithm == 2:
                     i = 1
                     # alg_result = BFS(start_pos_2, pos)
